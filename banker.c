@@ -53,23 +53,34 @@ int main(int argc, char *argv[]){
 
     // feeds maximum matrix
     int maximum_matrix[num_rows][num_cols];
-    int aux;
+    char *line = NULL;
+    size_t len = 0;
 
-    // char *token;
+    int row = 0;
+    while ((getline(&line, &len, customerFile)) != -1){
+        int col = 0;
+        char *token = strtok(line, ",\n");
 
+        while(token != NULL && col < num_cols){
+            maximum_matrix[row][col] = atoi(token);
+            token = strtok(NULL, ",\n");
+            col++;
+        }
+        row++;
+        if(row == num_rows){
+            break;
+        }
+    }
+    free(line);
 
-    // for(int i = 0; i < num_rows; i++){
-    //     for(int j = 0; j < num_cols; j++){
-    //         maximum_matrix[i][j] = aux;
-    //     }
-    // }
+    
 
-    // for(int i = 0; i < num_rows; i++){
-    //     for(int j = 0; j < num_cols; j++){
-    //         printf("%d ", maximum_matrix[i][j]);
-    //     }
-    //     printf("\n");
-    // }
+    for(int i = 0; i < num_rows; i++){
+        for(int j = 0; j < num_cols; j++){
+            printf("%d ", maximum_matrix[i][j]);
+        }
+        printf("\n");
+    }
 
     int allocation_matrix[num_rows][num_cols];
     int need_matrix[num_rows][num_cols];
