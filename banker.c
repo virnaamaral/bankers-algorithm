@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int sum_matrix(int matrix[3][3], int matrix2[3][3]){
     for(int i = 0; i < 3; i++){
@@ -20,43 +22,60 @@ int sub_matrix(int matrix[3][3], int matrix2[3][3]){
 
 int main(int argc, char *argv[]){
 
+    int num_cols = 0, num_rows = 1;
+
     // converting argv to int - available instance
     int available[argc-1];
     for(int i = 1; i < argc; i++){
         available[i-1] = atoi(argv[i]);
     }
 
-    int num_col = argc-1;
-    int num_rows;
+    num_cols = argc-1;
 
     FILE *customerFile;
     FILE *commandsFile;
 
-    
+    // verifies if file exists
+    customerFile = fopen("customer.txt", "r");
+    if(customerFile == NULL){
+        printf("File does not exist.\n");
+        exit(1);
+    }
 
-    // int matrix[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
-    // int matrix2[3][3] = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-    // for(int i = 0; i < 3; i++){
-    //     for(int j = 0; j < 3; j++){
-    //         printf("%d ", matrix[i][j]);
+    // gets num_rows by reading file and looking for '\n's
+    char ch;
+    while((ch = fgetc(customerFile)) != EOF){
+        if(ch == '\n'){
+            num_rows++;
+        }
+    }
+    fseek(customerFile, 0, SEEK_SET);
+
+    // feeds maximum matrix
+    int maximum_matrix[num_rows][num_cols];
+    int aux;
+
+    // char *token;
+
+
+    // for(int i = 0; i < num_rows; i++){
+    //     for(int j = 0; j < num_cols; j++){
+    //         maximum_matrix[i][j] = aux;
+    //     }
+    // }
+
+    // for(int i = 0; i < num_rows; i++){
+    //     for(int j = 0; j < num_cols; j++){
+    //         printf("%d ", maximum_matrix[i][j]);
     //     }
     //     printf("\n");
     // }
-    // printf("sum: \n");
-    // sum_matrix(matrix, matrix2);
-    // for(int i = 0; i < 3; i++){
-    //     for(int j = 0; j < 3; j++){
-    //         printf("%d ", matrix[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-    // printf("sub: \n");
-    // sub_matrix(matrix, matrix2);
-    // for(int i = 0; i < 3; i++){
-    //     for(int j = 0; j < 3; j++){
-    //         printf("%d ", matrix[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-    // return 0;
+
+    int allocation_matrix[num_rows][num_cols];
+    int need_matrix[num_rows][num_cols];
+
+    printf("num cols: %d\n", num_cols);
+    printf("num rows: %d\n", num_rows);
+
+    return 0;
 }
