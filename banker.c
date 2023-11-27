@@ -226,7 +226,7 @@ int main(int argc, char *argv[]){
         if(ch == '\n'){
             num_rows++;
         }
-    } //tem q arrumar pq se tiver 50 \n no arquivo vai dar como se tivesse 50 cliente sem ter
+    } 
     fseek(customerFile, 0, SEEK_SET);
 
     // if(){ // ainda n tem uma função q vê a quantidade de itens na customer
