@@ -21,30 +21,30 @@ void release(int customer, int num_rows, int num_cols, int instances[num_cols], 
     }
 }
 
-void print_all(int num_rows, int num_cols, int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
-    printf("MAXIMUM | ALLOCATION | NEED\n");
+void print_all(FILE *result, int num_rows, int num_cols, int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
+    fprintf(result ,"MAXIMUM | ALLOCATION | NEED\n");
     for(int i = 0; i < num_rows; i++){
         for(int j = 0; j < num_cols; j++){
-            printf("%d ", maximum_matrix[i][j]);
+            fprintf(result, "%d ", maximum_matrix[i][j]);
         }
-        printf("\t | ");
+        fprintf(result, "\t| ");
 
         for(int j = 0; j < num_cols; j++){
-            printf("%d ", allocation_matrix[i][j]);
+            fprintf(result, "%d ", allocation_matrix[i][j]);
         }
-        printf("\t | ");
+        fprintf(result,"\t | ");
     
         for(int j = 0; j < num_cols; j++){
-            printf("%d ", need_matrix[i][j]);
+            fprintf(result, "%d ", need_matrix[i][j]);
         }
-        printf("\n");
+        fprintf(result,"\n");
     }
-    printf("AVAILABLE ");
+    fprintf(result,"AVAILABLE ");
 
     for(int j = 0; j < num_cols; j++){
-        printf("%d ", available[j]);
+        fprintf(result,"%d ", available[j]);
     }
-    printf("\n");
+    fprintf(result,"\n");
 }
 
 void printfarray(int length, int array[length]){
@@ -129,64 +129,64 @@ int safe_state(int customer, int num_rows, int num_cols, int instances[num_cols]
     return 1;
 }
 
-int request_verification(int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
+int request_verification(FILE *result, int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
     
     for(int i = 0; i < num_cols; i++){
         if(maximum_matrix[customer][i] - instances[i] < 0 || need_matrix[customer][i] - instances[i] < 0){
-            printf("The customer %d request ", customer);
+            fprintf(result, "The customer %d request ", customer);
             for(int j = 0; j < num_cols; j++){
-                printf("%d ", instances[j]);
+                fprintf(result,"%d ", instances[j]);
             }
-            printf("was denied because exceed its maximum need\n");
+            fprintf(result, "was denied because exceed its maximum need\n");
             return 1;
         }else if(available[i] - instances[i] < 0){
-            printf("The resources ");
+            fprintf(result,"The resources ");
             for(int j = 0; j < num_cols; j++){
-                printf("%d ", available[j]);
+                fprintf(result,"%d ", available[j]);
             }
-            printf("are not enough to costumer %d request ", customer);
+            fprintf(result,"are not enough to costumer %d request ", customer);
             for(int j = 0; j < num_cols; j++){
-                printf("%d ", instances[j]);
+                fprintf(result,"%d ", instances[j]);
             }
-            printf("\n");
+            fprintf(result,"\n");
             return 1;
         }else if(safe_state(customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix, maximum_matrix) == 0){
-            printf("The customer %d request ", customer);
+            fprintf(result, "The customer %d request ", customer);
             for(int j = 0; j < num_cols; j++){
-                printf("%d ", instances[j]);
+                fprintf(result, "%d ", instances[j]);
             }
-            printf("was denied because result in an unsafe state\n");
+            fprintf(result,"was denied because result in an unsafe state\n");
             return 1;
         }
     }
 
-    printf("Allocate to customer %d the resources ", customer);
+    fprintf(result, "Allocate to customer %d the resources ", customer);
     for(int j = 0; j < num_cols; j++){
-        printf("%d ", instances[j]);
+        fprintf(result, "%d ", instances[j]);
     }
-    printf("\n");
+    fprintf(result,"\n");
     
     return 0;
 }
 
-int release_verification(int customer, int num_rows, int num_cols, int instances[num_cols], int allocation_matrix[num_rows][num_cols]){
+int release_verification(FILE *result, int customer, int num_rows, int num_cols, int instances[num_cols], int allocation_matrix[num_rows][num_cols]){
     
     for(int i = 0; i < num_cols; i++){
         if(allocation_matrix[customer][i] - instances[i] < 0){
-            printf("The customer %d released ", customer);
+            fprintf(result,"The customer %d released ", customer);
             for(int j = 0; j < num_cols; j++){
-                printf("%d ", instances[j]);
+                fprintf(result,"%d ", instances[j]);
             }
-            printf("was denied because exceed its maximum allocation\n");
+            fprintf(result,"was denied because exceed its maximum allocation\n");
             return 1;
         }
     }
 
-    printf("Release from customer %d the resources ", customer);
+    fprintf(result, "Release from customer %d the resources ", customer);
     for(int j = 0; j < num_cols; j++){
-        printf("%d ", instances[j]);
+        fprintf(result,"%d ", instances[j]);
     }
-    printf("\n");
+    fprintf(result,"\n");
     
     return 0;
 }
@@ -204,6 +204,12 @@ int main(int argc, char *argv[]){
     }
 
     num_cols = argc-1;
+
+    FILE *resultFile;
+    resultFile = fopen("result.txt", "w");
+    if(resultFile == NULL){
+        exit(1);
+    }
 
     FILE *customerFile;
 
@@ -296,18 +302,18 @@ int main(int argc, char *argv[]){
 
         if((strcmp(command, "RQ") == 0)){
             int flag_request = 0;
-            flag_request = request_verification(customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix, maximum_matrix);
+            flag_request = request_verification(resultFile, customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix, maximum_matrix);
            if(flag_request == 0){
                 request(customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix);
             }
         }else if((strcmp(command, "RL") == 0)){
             int flag_release = 0;
-            flag_release = release_verification(customer, num_rows, num_cols, instances, allocation_matrix);
+            flag_release = release_verification(resultFile, customer, num_rows, num_cols, instances, allocation_matrix);
             if(flag_release == 0){
                 release(customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix);
             }
         }else if((strcmp(command, "*") == 0)){
-            print_all(num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
+            print_all(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
 
         }else{
             printf("Invalid command.\n");
@@ -317,6 +323,7 @@ int main(int argc, char *argv[]){
     }
     free(line);
     fclose(commandsFile);
+    fclose(resultFile);
 
     return 0;
 }
