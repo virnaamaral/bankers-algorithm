@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+// #include <math.h>
 
 void request(int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols]);
 void release(int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols]);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
         exit(1);
     } // se o txt nao existir, nao puder ser aberto ou tiver numa formatacao diferente da que deveria ser, exibe a mensagem acima
 
-    char command[2];
+    char command[3];
     int customer;
     int instances[num_cols];
     line = NULL;
@@ -111,8 +111,8 @@ int main(int argc, char *argv[]){
         int col = 0;
         int instances_count = 0;
         
-        char *token = strtok(line, " \n");
-        while(token != NULL && col < num_cols + 2){
+        char *token = strtok(line, " ");
+        while(token != NULL && strcmp(token, "\n") != 0 && col < num_cols + 2){
             if(col == 0){
                 strcpy(command, token);
             }else if(col == 1){
@@ -121,9 +121,9 @@ int main(int argc, char *argv[]){
                 instances[instances_count] = atoi(token);
                 instances_count++;
             }
-            token = strtok(NULL, " \n");
+            token = strtok(NULL, " ");
             col++;
-        }    
+        }
 
         if((strcmp(command, "RQ") == 0)){
             int flag_request = 0;
@@ -137,11 +137,13 @@ int main(int argc, char *argv[]){
             if(flag_release == 0){
                 release(customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix);
             }
-        }else if((strcmp(command, "*") == 0)){
-            // print_all(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
+        }else if((strcmp(command, "*\n") == 0)){
+            printf("<<%s>>\n", command);
             formated_print(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
+            // print_all(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
         }else{
             printf("Invalid command.\n");
+            printf("<<%s>>\n", command);
         } // fazer tratamento de erro aqui: se n foi nenhum dos tres, printar uma exceção
 
         row++;
@@ -206,7 +208,7 @@ void printfarray(int length, int array[length]){
 }
 
 void formated_print(FILE *result, int num_rows, int num_cols, int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
-
+    printf("----ENTROU NA FORM PRIN\n----");
     int len_max[num_cols], len_alloc[num_cols], len_need[num_cols];
 
     for(int i = 0; i < num_cols; i++){
@@ -224,16 +226,21 @@ void formated_print(FILE *result, int num_rows, int num_cols, int available[num_
         }
     }
     
-    int length;
+    int length = 0;
     for(int i = 0; i < num_cols; i++){
         // printf("[%d] - %d || ", i, len_max[i]);
         if(len_max[i] == 0){
             length = 1;
         }else{
-            length = floor(log10(abs(len_max[i]))) + 1;
+            while(len_max[i] != 0) {
+                len_max[i] = len_max[i] / 10;
+                length++;
+            }
+            // length = floor(log10(abs(len_max[i]))) + 1;
         }
         // printf("tamanho[%d] - %d\n", i, length);
         len_max[i] = length;
+        length = 0;
     }
 
     int sum_max_len = 0;
@@ -254,9 +261,14 @@ void formated_print(FILE *result, int num_rows, int num_cols, int available[num_
         if(len_alloc[i] == 0){
             length = 1;
         }else{
-            length = floor(log10(abs(len_alloc[i]))) + 1;
+            while(len_max[i] != 0) {
+                len_max[i] = len_max[i] / 10;
+                length++;
+            }
+            // length = floor(log10(abs(len_alloc[i]))) + 1;
         }
         len_alloc[i] = length;
+        length = 0;
     }
     
     int sum_alloc_len = 0;
@@ -265,7 +277,6 @@ void formated_print(FILE *result, int num_rows, int num_cols, int available[num_
     }
 
     //need
-
     for(int j = 0; j < num_cols; j++){
         for(int i = 0; i < num_rows; i++){
             if(need_matrix[i][j] > len_need[j]){
@@ -278,9 +289,14 @@ void formated_print(FILE *result, int num_rows, int num_cols, int available[num_
         if(len_need[i] == 0){
             length = 1;
         }else{
-            length = floor(log10(abs(len_need[i]))) + 1;
+            while(len_max[i] != 0) {
+                len_max[i] = len_max[i] / 10;
+                length++;
+            }
+            // length = floor(log10(abs(len_need[i]))) + 1;
         }
         len_need[i] = length;
+        length = 0;
     }
     
     int sum_need_len = 0;
