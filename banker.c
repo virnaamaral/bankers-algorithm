@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 void request(int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols]);
 void release(int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols]);
 void print_all(FILE *result, int num_rows, int num_cols, int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]);
 void printfarray(int length, int array[length]);
+void formated_print(FILE *result, int num_rows, int num_cols, int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]);
 int request_verification(FILE *result, int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]);
 int release_verification(FILE *result, int customer, int num_rows, int num_cols, int instances[num_cols], int allocation_matrix[num_rows][num_cols]);
 int compare(int customer, int num_cols, int copy_need_matrix[num_cols], int copy_available[num_cols]);
@@ -136,8 +138,8 @@ int main(int argc, char *argv[]){
                 release(customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix);
             }
         }else if((strcmp(command, "*") == 0)){
-            print_all(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
-
+            // print_all(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
+            formated_print(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
         }else{
             printf("Invalid command.\n");
         } // fazer tratamento de erro aqui: se n foi nenhum dos tres, printar uma exceção
@@ -201,6 +203,154 @@ void printfarray(int length, int array[length]){
         printf("%d ", array[i]);
     }
     printf("\n");
+}
+
+void formated_print(FILE *result, int num_rows, int num_cols, int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
+
+    int len_max[num_cols], len_alloc[num_cols], len_need[num_cols];
+
+    for(int i = 0; i < num_cols; i++){
+        len_max[i] = 0;
+        len_alloc[i] = 0;
+        len_need[i] = 0;
+    }
+
+    // max
+    for(int j = 0; j < num_cols; j++){
+        for(int i = 0; i < num_rows; i++){
+            if(maximum_matrix[i][j] > len_max[j]){
+                len_max[j] = maximum_matrix[i][j];
+            }
+        }
+    }
+    
+    int length;
+    for(int i = 0; i < num_cols; i++){
+        // printf("[%d] - %d || ", i, len_max[i]);
+        if(len_max[i] == 0){
+            length = 1;
+        }else{
+            length = floor(log10(abs(len_max[i]))) + 1;
+        }
+        // printf("tamanho[%d] - %d\n", i, length);
+        len_max[i] = length;
+    }
+
+    int sum_max_len = 0;
+    for(int i = 0; i < num_cols; i++){
+        sum_max_len += len_max[i];
+    }
+
+    // alloc
+    for(int j = 0; j < num_cols; j++){
+        for(int i = 0; i < num_rows; i++){
+            if(allocation_matrix[i][j] > len_alloc[j]){
+                len_alloc[j] = allocation_matrix[i][j];
+            }
+        }
+    }
+
+    for(int i = 0; i < num_cols; i++){
+        if(len_alloc[i] == 0){
+            length = 1;
+        }else{
+            length = floor(log10(abs(len_alloc[i]))) + 1;
+        }
+        len_alloc[i] = length;
+    }
+    
+    int sum_alloc_len = 0;
+    for(int i = 0; i < num_cols; i++){
+        sum_alloc_len += len_alloc[i];
+    }
+
+    //need
+
+    for(int j = 0; j < num_cols; j++){
+        for(int i = 0; i < num_rows; i++){
+            if(need_matrix[i][j] > len_need[j]){
+                len_need[j] = need_matrix[i][j];
+            }
+        }
+    }
+
+    for(int i = 0; i < num_cols; i++){
+        if(len_need[i] == 0){
+            length = 1;
+        }else{
+            length = floor(log10(abs(len_need[i]))) + 1;
+        }
+        len_need[i] = length;
+    }
+    
+    int sum_need_len = 0;
+    for(int i = 0; i < num_cols; i++){
+        sum_need_len += len_need[i];
+    }
+
+    // printf("array max: ");
+    // for(int i = 0; i < num_cols; i++){
+    //     printf("%d ", len_max[i]);
+    // }
+
+    // printf("\nmax_len: %d\n", sum_max_len);
+    // printf("\nalloc_len: %d\n", sum_alloc_len);
+
+    fprintf(result, "MAXIMUM ");
+    if(sum_max_len + num_cols > 8){
+        for(int i = 8; i < sum_max_len + num_cols; i++){
+            fprintf(result, " ");
+        }
+    }
+    fprintf(result, "| ");
+
+    
+    fprintf(result, "ALLOCATION ");
+    if(sum_alloc_len + num_cols > 11){
+        for(int i = 11; i < sum_alloc_len + num_cols; i++){
+            fprintf(result, " ");
+        }
+    }
+    fprintf(result, "| NEED\n");
+
+    for(int i = 0; i < num_rows; i++){
+        for(int j = 0; j < num_cols; j++){
+            fprintf(result, "%*d ", len_max[j], maximum_matrix[i][j]);
+        }
+
+        if(sum_max_len + num_cols < 8){
+            for(int i = sum_max_len + num_cols; i < 8; i++){
+                fprintf(result, " ");
+            }
+        }
+
+        fprintf(result, "| ");
+
+        for(int j = 0; j < num_cols; j++){
+            fprintf(result, "%*d ", len_alloc[j], allocation_matrix[i][j]);
+        }
+
+        if(sum_alloc_len + num_cols < 11){
+            for(int i = sum_alloc_len + num_cols; i < 11; i++){
+                fprintf(result, " ");
+            }
+        }
+
+        fprintf(result, "| ");
+
+         for(int j = 0; j < num_cols; j++){
+            fprintf(result, "%*d ", len_need[j], need_matrix[i][j]);
+        }
+
+        fprintf(result, "\n");
+    }
+
+    fprintf(result, "AVAILABLE ");
+    for(int j = 0; j < num_cols; j++){
+        fprintf(result, "%d ", available[j]);
+    }
+    fprintf(result, "\n");
+
 }
 
 int request_verification(FILE *result, int customer, int num_rows, int num_cols, int instances[num_cols], int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
