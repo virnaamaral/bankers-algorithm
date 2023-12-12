@@ -137,13 +137,12 @@ int main(int argc, char *argv[]){
             if(flag_release == 0){
                 release(customer, num_rows, num_cols, instances, available, allocation_matrix, need_matrix);
             }
-        }else if((strcmp(command, "*\n") == 0)){
-            printf("<<%s>>\n", command);
+        }else if((strstr(command, "*\n") == 0) || (strcmp(command, "*") == 0) || (strcmp(command, "*\n") == 0)){
             formated_print(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
             // print_all(resultFile, num_rows, num_cols, available, allocation_matrix, need_matrix, maximum_matrix);
         }else{
             printf("Invalid command.\n");
-            printf("<<%s>>\n", command);
+            // printf("<<%s>>\n", command);
         } // fazer tratamento de erro aqui: se n foi nenhum dos tres, printar uma exceção
 
         row++;
@@ -208,7 +207,6 @@ void printfarray(int length, int array[length]){
 }
 
 void formated_print(FILE *result, int num_rows, int num_cols, int available[num_cols], int allocation_matrix[num_rows][num_cols], int need_matrix[num_rows][num_cols], int maximum_matrix[num_rows][num_cols]){
-    printf("----ENTROU NA FORM PRIN\n----");
     int len_max[num_cols], len_alloc[num_cols], len_need[num_cols];
 
     for(int i = 0; i < num_cols; i++){
